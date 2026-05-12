@@ -1,0 +1,24 @@
+title = "SecureShield Gitleaks Config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "custom-api-key"
+description = "Custom API Key pattern"
+regex = '''(?i)(api[_-]?key|apikey)\s*=\s*['"][a-zA-Z0-9]{16,}['"]'''
+tags = ["api", "key"]
+
+[[rules]]
+id = "custom-db-password"
+description = "Hardcoded database password"
+regex = '''(?i)(db[_-]?pass|database[_-]?password)\s*=\s*['"][^'"]{6,}['"]'''
+tags = ["database", "password"]
+
+[allowlist]
+description = "Allowlist for false positives"
+paths = [
+  ".gitleaks.toml",
+  "node_modules",
+  "coverage"
+]

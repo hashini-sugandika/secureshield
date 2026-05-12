@@ -1,0 +1,67 @@
+services:
+
+  # --- The API app ---
+  api:
+    build: ./app
+    container_name: secureshield-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=secureshield
+      - DB_USER=appuser
+      - DB_PASSWORD=apppassword
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - secureshield-net
+    restart: unless-stopped
+
+  # --- PostgreSQL database ---
+  postgres:
+    image: postgres:15-alpine
+    container_name: secureshield-db
+    environment:
+      POSTGRES_DB: secureshield
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppassword
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d secureshield"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - secureshield-net
+    restart: unless-stopped
+
+  # --- SonarQube for code quality ---
+  sonarqube:
+    image: sonarqube:10-community
+    container_name: secureshield-sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-logs:/opt/sonarqube/logs
+      - sonarqube-extensions:/opt/sonarqube/extensions
+    networks:
+      - secureshield-net
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  sonarqube-data:
+  sonarqube-logs:
+  sonarqube-extensions:
+
+networks:
+  secureshield-net:
+    driver: bridge
