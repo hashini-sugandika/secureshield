@@ -24,3 +24,6 @@ terraform/.terraform.lock.hcl
 trivy-report.json
 sbom.json
 trivy.yaml
+.scannerwork/
+trivy-report.json
+sbom.json
