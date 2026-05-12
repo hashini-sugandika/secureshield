@@ -1,0 +1,35 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: trustedregistry
+spec:
+  crd:
+    spec:
+      names:
+        kind: TrustedRegistry
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package trustedregistry
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not starts_with_allowed(container.image)
+          msg := sprintf("Container '%v' uses untrusted registry: %v", [container.name, container.image])
+        }
+        starts_with_allowed(image) {
+          allowed := ["ghcr.io/hashini-sugandika", "docker.io/library", "postgres", "redis", "kindest", "nginx"]
+          startswith(image, allowed[_])
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: TrustedRegistry
+metadata:
+  name: trusted-registry
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    excludedNamespaces:
+      - kube-system
+      - gatekeeper-system
