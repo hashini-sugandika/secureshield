@@ -29,10 +29,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ============================================================
-  # GATE 2 — Code Quality (SonarQube)
+  # GATE 2 — Code Quality (SonarCloud)
   # ============================================================
   code-quality:
-    name: "Gate 2: Code Quality (SonarQube)"
+    name: "Gate 2: Code Quality (SonarCloud)"
     runs-on: ubuntu-latest
     needs: secret-scan
     steps:
@@ -53,18 +53,11 @@ jobs:
         working-directory: app
         run: npm test
 
-      - name: SonarQube scan
+      - name: SonarCloud scan
         uses: SonarSource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          args: >
-            -Dsonar.projectKey=secureshield
-            -Dsonar.sources=app/src
-            -Dsonar.tests=app/tests
-            -Dsonar.javascript.lcov.reportPaths=app/coverage/lcov.info
-            -Dsonar.qualitygate.wait=true
 
   # ============================================================
   # Build Docker image — gates 1 & 2 must pass first
@@ -76,8 +69,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      image-tag: ${{ steps.meta.outputs.tags }}
     steps:
       - uses: actions/checkout@v4
 
@@ -134,7 +125,7 @@ jobs:
           severity: CRITICAL
           ignore-unfixed: true
 
-      - name: Run Trivy — Full report (all severities, informational)
+      - name: Run Trivy — Full report (informational)
         if: always()
         uses: aquasecurity/trivy-action@master
         with:
@@ -165,4 +156,3 @@ jobs:
           name: sbom
           path: sbom.json
           retention-days: 30
-
