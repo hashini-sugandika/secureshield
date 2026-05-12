@@ -1,0 +1,6 @@
+projectKey=secureshield
+serverUrl=http://localhost:9000
+serverVersion=10.7.0.96327
+dashboardUrl=http://localhost:9000/dashboard?id=secureshield
+ceTaskId=17003957-e29d-41f1-b00a-a90359727e9a
+ceTaskUrl=http://localhost:9000/api/ce/task?id=17003957-e29d-41f1-b00a-a90359727e9a

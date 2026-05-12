@@ -14,10 +14,13 @@ app.use('/health', healthRouter);
 app.use('/users', usersRouter);
 app.use('/products', productsRouter);
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`SecureShield API running on port ${PORT}`);
-});
+// Only start listening if this file is run directly
+// This lets tests import app without binding to a port
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`SecureShield API running on port ${PORT}`);
+  });
+}
 
 module.exports = app;
