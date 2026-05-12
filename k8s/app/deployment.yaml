@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secureshield-api
+  namespace: secureshield
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secureshield-api
+  template:
+    metadata:
+      labels:
+        app: secureshield-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/hashini-sugandika/secureshield-api:latest
+          ports:
+            - containerPort: 3000
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+            requests:
+              cpu: "250m"
+              memory: "128Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: secureshield-api
+  namespace: secureshield
+spec:
+  selector:
+    app: secureshield-api
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: ClusterIP

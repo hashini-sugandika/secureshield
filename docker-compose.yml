@@ -1,5 +1,4 @@
 services:
-
   # --- The API app ---
   api:
     build: ./app
@@ -52,6 +51,23 @@ services:
       - sonarqube-data:/opt/sonarqube/data
       - sonarqube-logs:/opt/sonarqube/logs
       - sonarqube-extensions:/opt/sonarqube/extensions
+    networks:
+      - secureshield-net
+    restart: unless-stopped
+
+  # --- HashiCorp Vault ---
+  vault:
+    image: hashicorp/vault:1.15
+    container_name: secureshield-vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "secureshield-root-token"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./vault/data:/vault/file
     networks:
       - secureshield-net
     restart: unless-stopped
